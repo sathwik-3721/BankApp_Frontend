@@ -1,3 +1,4 @@
+// src/components/DashboardPage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import '../styles.css'; // Correct import path
@@ -8,7 +9,8 @@ const DashboardPage = () => {
   const email = localStorage.getItem('email'); // Assuming email is stored in localStorage
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [balanceError, setBalanceError] = useState('');
+  const [transactionError, setTransactionError] = useState('');
 
   const handleLogout = () => {
     localStorage.removeItem('username');
@@ -33,10 +35,10 @@ const DashboardPage = () => {
         if (result && result.length > 0 && result[0].balance) {
           setBalance(result[0].balance);
         } else {
-          setErrorMessage('Please create an account');
+          setBalanceError('Please create an account');
         }
       } catch (error) {
-        setErrorMessage('Error fetching balance. Please create an account.');
+        setBalanceError('Error fetching balance. Please create an account.');
       }
     };
 
@@ -56,10 +58,10 @@ const DashboardPage = () => {
         if (result && result.length > 0) {
           setTransactions(result);
         } else {
-          setErrorMessage('No transactions found.');
+          setTransactionError('No transactions found.');
         }
       } catch (error) {
-        setErrorMessage('Error fetching transactions.');
+        setTransactionError('Error fetching transactions.');
       }
     };
 
@@ -67,7 +69,7 @@ const DashboardPage = () => {
       fetchBalance();
       fetchTransactions();
     } else {
-      setErrorMessage('Please create an account');
+      setBalanceError('Please create an account');
     }
   }, [email]);
 
@@ -94,6 +96,12 @@ const DashboardPage = () => {
             <li>
               <Link to="transfer">Transfer Money</Link>
             </li>
+            <li>
+              <Link to="apply-card">Apply for Card</Link> {/* New Link */}
+            </li>
+            <li>
+              <Link to="generate-pin">Generate PIN for Card</Link>
+            </li>
           </ul>
         </nav>
         <main className="content">
@@ -101,7 +109,7 @@ const DashboardPage = () => {
             {balance !== null ? (
               <p>Your balance: ${balance}</p>
             ) : (
-              <p>{errorMessage}</p>
+              <p>{balanceError}</p>
             )}
           </div>
           
@@ -111,12 +119,13 @@ const DashboardPage = () => {
               <ul>
                 {transactions.map(transaction => (
                   <li key={transaction.transaction_id}>
-                    {transaction.transaction_type === 'deposit' ? 'Deposited' : 'Withdrew'} ${transaction.amount} on {new Date(transaction.transaction_date).toLocaleDateString()}
+                    {transaction.transaction_type === 'deposit' ? 'Deposited ' : 'Withdrew '} 
+                    ${transaction.amount} on {new Date(transaction.transaction_date).toLocaleDateString()}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>{errorMessage}</p>
+              <p>{transactionError}</p>
             )}
           </div>
           

@@ -580,3 +580,119 @@ h2 {
     margin-bottom: 10px;
   }
 }
+
+.apply-card-wrapper {
+  text-align: center;
+  margin-bottom: 20px; /* Space between title and form */
+}
+
+.apply-card-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px; /* Space between title and form */
+}
+
+.apply-card-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto; /* Center align the form */
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1); /* Shadow for form */
+}
+
+.apply-card-container .form-group {
+  margin-bottom: 15px;
+}
+
+.apply-card-container .form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.apply-card-container .form-group input,
+.apply-card-container .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.apply-card-container button {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.apply-card-container button:hover {
+  background-color: #0056b3;
+}
+
+.apply-card-container .message {
+  margin-top: 20px;
+  color: green;
+}
+
+.generate-pin-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.generate-pin-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.generate-pin-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+}
+
+.generate-pin-container .form-group {
+  margin-bottom: 15px;
+}
+
+.generate-pin-container .form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.generate-pin-container .form-group input,
+.generate-pin-container .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.generate-pin-container button {
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.generate-pin-container button:hover {
+  background-color: #0056b3;
+}
+
+.generate-pin-container .message {
+  margin-top: 20px;
+  color: green;
+}
