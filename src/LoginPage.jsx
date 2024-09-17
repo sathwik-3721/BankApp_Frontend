@@ -1,73 +1,126 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './styles.css'; // Import the CSS file
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LockIcon, UserIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+export default function Component() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate()
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/v1/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/v1/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
-        alert("Check username or password");
-        throw new Error('Login failed');
+        alert("Check email or password");
+        throw new Error("Login failed");
       }
 
       // Assuming the response contains a success message or token, parse the response
       const result = await response.json();
 
       // Store the email in localStorage upon successful login
-      localStorage.setItem('username', email);   // Store the username
-      localStorage.setItem('email', email);      // Store the email for API calls
+      localStorage.setItem("email", email); // Store the email
+      localStorage.setItem("email", email); // Store the email for API calls
 
       // Redirect to dashboard
-      navigate('/dashboard');
+      navigate("/home/dashboard");
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
+    console.log("Login attempted with:", email, password);
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4">
+      <div className="absolute inset-0 z-0">
+       
+      </div>
+      <div className="z-10 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg p-8 max-w-md w-full transition-all duration-300 ease-in-out hover:shadow-xl">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-blue-900 mb-2">miraBank</h1>
+          <p className="text-blue-700">Login to your account</p>
         </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-blue-900 font-semibold">
+              email
+            </Label>
+            <div className="relative">
+              <UserIcon
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"
+                size={20}
+              />
+              <Input
+                id="email"
+                type="text"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10 bg-white bg-opacity-50 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-md"
+                required
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-blue-900 font-semibold">
+              Password
+            </Label>
+            <div className="relative">
+              <LockIcon
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500"
+                size={20}
+              />
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10 bg-white bg-opacity-50 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 rounded-md"
+                required
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="form-checkbox text-blue-500 rounded"
+              />
+              <span className="text-sm text-blue-700">Remember me</span>
+            </label>
+            <a href="#" className="text-sm text-blue-600 hover:underline">
+              Forgot password?
+            </a>
+          </div>
+          <Button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+          >
+            Log In
+          </Button>
+        </form>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-blue-700">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-blue-600 hover:underline font-semibold">
+                Sign up
+            </Link>
+          </p>
         </div>
-        <button type="submit">Login</button>
-        <div>
-          <a href="/signup">Sign up</a>
-        </div>
-      </form>
+      </div>
     </div>
   );
-};
-
-export default LoginPage;
+}
