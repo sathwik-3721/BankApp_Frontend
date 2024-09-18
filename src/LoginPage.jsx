@@ -31,22 +31,38 @@ export default function Component() {
       const result = await response.json();
 
       // Store the email in localStorage upon successful login
-      localStorage.setItem("email", email); // Store the email
-      localStorage.setItem("email", email); // Store the email for API calls
+      localStorage.setItem("email", email);
+
+      // Fetch the username
+      try {
+        const usernameResponse = await fetch(`http://localhost:8000/v1/bank/getUserName/${email}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!usernameResponse.ok) {
+          throw new Error("Failed to fetch username");
+        }
+
+        const usernameResult = await usernameResponse.json();
+        localStorage.setItem("username", usernameResult.name);
+      } catch (usernameError) {
+        console.error("Error fetching username:", usernameError);
+        // If username fetch fails, set a default or leave it unset
+        localStorage.setItem("username", email.split('@')[0]); // Use email prefix as fallback
+      }
 
       // Redirect to dashboard
       navigate("/home/dashboard");
     } catch (error) {
       console.error("Error:", error);
     }
-    console.log("Login attempted with:", email, password);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4">
-      <div className="absolute inset-0 z-0">
-       
-      </div>
       <div className="z-10 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-xl shadow-lg p-8 max-w-md w-full transition-all duration-300 ease-in-out hover:shadow-xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-blue-900 mb-2">miraBank</h1>
@@ -55,7 +71,7 @@ export default function Component() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-blue-900 font-semibold">
-              email
+              Email
             </Label>
             <div className="relative">
               <UserIcon
@@ -64,7 +80,7 @@ export default function Component() {
               />
               <Input
                 id="email"
-                type="text"
+                type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -116,7 +132,7 @@ export default function Component() {
           <p className="text-sm text-blue-700">
             Don't have an account?{" "}
             <Link to="/signup" className="text-blue-600 hover:underline font-semibold">
-                Sign up
+              Sign up
             </Link>
           </p>
         </div>

@@ -1,23 +1,33 @@
+'use client'
+
 import React, { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BarChart3, CreditCard, Send, DollarSign, LogOut } from "lucide-react";
+import { BarChart3, ClipboardList, Key, RefreshCw, CreditCard, Eye, EyeOff } from "lucide-react";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const username = localStorage.getItem("username");
-  const email = localStorage.getItem("email");
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [balanceError, setBalanceError] = useState("");
   const [transactionError, setTransactionError] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [avatarClicked, setAvatarClicked] = useState(false);
+  const [accountNumber, setAccountNumber] = useState(null);
+  const [accountError, setAccountError] = useState("");
+  const [showFullAccountNumber, setShowFullAccountNumber] = useState(false);
+
+  const username = localStorage.getItem("username");
+  const email = localStorage.getItem("email");
 
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     navigate("/login");
+  };
+
+  const toggleAvatarMenu = () => {
+    setAvatarClicked(!avatarClicked);
   };
 
   useEffect(() => {
@@ -65,75 +75,100 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchAccountNumber = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/v1/bank/getAccnoByMail/${email}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const result = await response.json();
+        if (result && result.acc_no) {
+          // Save the account number to local storage
+          localStorage.setItem("accountNumber", result.acc_no);
+          setAccountNumber(result.acc_no);
+        } else {
+          setAccountError("Account number not found.");
+        }
+      } catch (error) {
+        setAccountError("Error fetching account number.");
+      }
+    };    
+
     if (email) {
       fetchBalance();
       fetchTransactions();
+      fetchAccountNumber();
     } else {
       setBalanceError("Please create an account");
     }
   }, [email]);
 
+  const maskAndGroupAccountNumber = (accNo) => {
+    if (!accNo) return "";
+    const maskedPart = accNo.slice(0, -4).replace(/\d/g, "*");
+    const visiblePart = accNo.slice(-4);
+    const groupedMaskedPart = maskedPart.match(/.{1,4}/g).join(" ");
+    return `${groupedMaskedPart} ${visiblePart}`;
+  };
+
   const handleNavigation = (page) => {
     setActiveTab(page);
-    if (page === "dashboard") {
-      navigate("/home/dashboard");
-    } else if (page === "deposit") {
-      navigate("/home/deposit");
-    } else if (page === "withdraw") {
-      navigate("/home/withdraw");
-    } else if (page === "transfer") {
-      navigate("/home/transfer");
-    } else if (page === "apply-card") {
-      navigate("/home/apply-card");
-    }
+    navigate(`/home/${page}`);
+  };
+
+  const toggleAccountNumberVisibility = () => {
+    setShowFullAccountNumber(!showFullAccountNumber);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-teal-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          {/* Left side (miraBank) */}
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-sky-600">miraBank</h1>
           </div>
 
-          {/* Right side (Avatar and Logout) */}
-          <div className="flex items-center space-x-4">
-            <Avatar>
-              <AvatarImage
-                src="/placeholder.svg?height=32&width=32"
-                alt="User"
-              />
-              <AvatarFallback>{username ? username[0] : "JD"}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium text-gray-700">
-              {username}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-sky-600 hover:text-sky-700 hover:bg-sky-50"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5 mr-2" />
-              Logout
-            </Button>
+          <div className="relative">
+            <img
+              src={`https://avatar.iran.liara.run/username?username=${username?.replace(
+                " ",
+                "+"
+              ) || "User"}`}
+              alt="Avatar"
+              className="w-10 h-10 rounded-full cursor-pointer"
+              onClick={toggleAvatarMenu}
+            />
+            {avatarClicked && (
+              <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg z-50">
+                <div className="p-4">
+                  <div className="text-gray-700 font-semibold">{username}</div>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-2 w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors duration-300"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       <div className="flex-1 flex">
-        {/* Sidebar Navigation */}
         <nav className="bg-sky-100 w-64 p-6 hidden md:block">
           <div className="space-y-4">
-            {/* Dashboard */}
             <Button
               variant={activeTab === "dashboard" ? "secondary" : "ghost"}
               className={`w-full justify-start ${
                 activeTab === "dashboard"
-                  ? "bg-sky-200 text-sky-800"
-                  : "text-sky-600 hover:bg-sky-200 hover:text-sky-800"
+                  ? "bg-sky-600 text-sky-200 hover:text-sky-800"
+                  : "text-sky-600 bg-sky-200 hover:text-sky-800"
               }`}
               onClick={() => handleNavigation("dashboard")}
             >
@@ -141,65 +176,86 @@ export default function DashboardPage() {
               Dashboard
             </Button>
 
-            {/* Deposit */}
             <Button
-              variant={activeTab === "deposit" ? "secondary" : "ghost"}
+              variant={activeTab === "transactions" ? "secondary" : "ghost"}
               className={`w-full justify-start ${
-                activeTab === "deposit"
-                  ? "bg-sky-200 text-sky-800"
-                  : "text-sky-600 hover:bg-sky-200 hover:text-sky-800"
+                activeTab === "transactions"
+                  ? "bg-sky-600 text-sky-200 hover:text-sky-800"
+                  : "text-sky-600 bg-sky-200 hover:text-sky-800"
               }`}
-              onClick={() => handleNavigation("deposit")}
+              onClick={() => handleNavigation("transactions")}
             >
-              <DollarSign className="h-5 w-5 mr-3" />
-              Deposit
+              <ClipboardList className="h-5 w-5 mr-3" />
+              Transactions
             </Button>
 
-            {/* Withdraw */}
             <Button
-              variant={activeTab === "withdraw" ? "secondary" : "ghost"}
+              variant={activeTab === "generate-pin" ? "secondary" : "ghost"}
               className={`w-full justify-start ${
-                activeTab === "withdraw"
-                  ? "bg-sky-200 text-sky-800"
-                  : "text-sky-600 hover:bg-sky-200 hover:text-sky-800"
+                activeTab === "generate-pin"
+                  ? "bg-sky-600 text-sky-200 hover:text-sky-800"
+                  : "text-sky-600 bg-sky-200 hover:text-sky-800"
               }`}
-              onClick={() => handleNavigation("withdraw")}
+              onClick={() => handleNavigation("generate-pin")}
             >
-              <DollarSign className="h-5 w-5 mr-3" />
-              Withdraw
+              <Key className="h-5 w-5 mr-3" />
+              Generate PIN
             </Button>
 
-            {/* Transfer */}
             <Button
-              variant={activeTab === "transfer" ? "secondary" : "ghost"}
+              variant={activeTab === "update-pin" ? "secondary" : "ghost"}
               className={`w-full justify-start ${
-                activeTab === "transfer"
-                  ? "bg-sky-200 text-sky-800"
-                  : "text-sky-600 hover:bg-sky-200 hover:text-sky-800"
+                activeTab === "update-pin"
+                  ? "bg-sky-600 text-sky-800 hover:text-sky-800"
+                  : "text-sky-600 bg-sky-200 hover:text-sky-800"
               }`}
-              onClick={() => handleNavigation("transfer")}
+              onClick={() => handleNavigation("update-pin")}
             >
-              <Send className="h-5 w-5 mr-3" />
-              Transfer
+              <RefreshCw className="h-5 w-5 mr-3" />
+              Update PIN
             </Button>
 
-            {/* Apply for Card */}
             <Button
-              variant={activeTab === "apply-card" ? "secondary" : "ghost"}
+              variant={activeTab === "card-details" ? "secondary" : "ghost"}
               className={`w-full justify-start ${
-                activeTab === "apply-card"
-                  ? "bg-sky-200 text-sky-800"
-                  : "text-sky-600 hover:bg-sky-200 hover:text-sky-800"
+                activeTab === "card-details"
+                  ? "bg-sky-600 text-sky-200 hover:text-sky-800"
+                  : "text-sky-600 bg-sky-200 hover:text-sky-800"
               }`}
-              onClick={() => handleNavigation("apply-card")}
+              onClick={() => handleNavigation("card-details")}
             >
               <CreditCard className="h-5 w-5 mr-3" />
-              Apply for Card
+              Card Details
             </Button>
           </div>
         </nav>
-        <div className="w-full p-6">
-          {/* Render nested routes */}
+        <div className="w-full p-6 relative z-0">
+          {accountNumber ? (
+            <div className="mb-6 text-lg font-semibold text-sky-600 flex items-center">
+              <span>Account Number: </span>
+                <span className="ml-2">
+                  {showFullAccountNumber
+                    ? accountNumber
+                    : maskAndGroupAccountNumber(accountNumber)}
+                </span>
+            <button
+              onClick={toggleAccountNumberVisibility}
+              className="ml-2 p-1 flex items-center justify-center bg-blue-500 rounded-full focus:outline-none hover:bg-blue-600 transition-colors"
+              aria-label={showFullAccountNumber ? "Hide account number" : "Show full account number"}
+            >
+              {showFullAccountNumber ? (
+                <EyeOff className="h-5 w-5 text-white" />
+              ) : (
+                <Eye className="h-5 w-5 text-white" />
+              )}
+            </button>
+          </div>
+          
+          ) : (
+            <div className="mb-6 text-lg font-semibold text-red-600">
+              {accountError}
+            </div>
+          )}
           <Outlet />
         </div>
       </div>
