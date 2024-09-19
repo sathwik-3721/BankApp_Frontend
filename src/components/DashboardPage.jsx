@@ -1,7 +1,5 @@
-'use client'
-
 import React, { useEffect, useState } from "react";
-import { Outlet, useNavigate, Link } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BarChart3, ClipboardList, Key, RefreshCw, CreditCard, Eye, EyeOff } from "lucide-react";
 
@@ -19,10 +17,12 @@ export default function DashboardPage() {
 
   const username = localStorage.getItem("username");
   const email = localStorage.getItem("email");
+  const token = localStorage.getItem("token"); // Retrieve token from localStorage
 
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
+    localStorage.removeItem("token"); // Remove token on logout
     navigate("/login");
   };
 
@@ -39,6 +39,7 @@ export default function DashboardPage() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}` // Include Bearer token
             },
           }
         );
@@ -61,6 +62,7 @@ export default function DashboardPage() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}` // Include Bearer token
             },
           }
         );
@@ -83,6 +85,7 @@ export default function DashboardPage() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}` // Include Bearer token
             },
           }
         );
@@ -106,7 +109,7 @@ export default function DashboardPage() {
     } else {
       setBalanceError("Please create an account");
     }
-  }, [email]);
+  }, [email, token]);
 
   const maskAndGroupAccountNumber = (accNo) => {
     if (!accNo) return "";

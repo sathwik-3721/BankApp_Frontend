@@ -49,10 +49,13 @@ export default function Component() {
     e.preventDefault()
     if (validateForm()) {
       try {
+        const token = localStorage.getItem('token') // Retrieve the token from local storage
+
         const response = await fetch('http://localhost:8000/v1/bank/createAccount', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Include the token in the Authorization header
           },
           body: JSON.stringify(formData),
         })

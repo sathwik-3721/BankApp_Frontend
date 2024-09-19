@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LockIcon, UserIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Component() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,18 +26,23 @@ export default function Component() {
         throw new Error("Login failed");
       }
 
-      // Assuming the response contains a success message or token, parse the response
+      // Assuming the response contains a message and token
       const result = await response.json();
 
-      // Store the email in localStorage upon successful login
+      // Store the token in localStorage upon successful login
+      localStorage.setItem("token", result.token);
+
+      // Store the email in localStorage
       localStorage.setItem("email", email);
 
       // Fetch the username
       try {
+        const token = result.token; // Use the token from login response
         const usernameResponse = await fetch(`http://localhost:8000/v1/bank/getUserName/${email}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, // Pass token as Bearer token
           },
         });
 
@@ -117,9 +121,9 @@ export default function Component() {
               />
               <span className="text-sm text-blue-700">Remember me</span>
             </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
               Forgot password?
-            </a>
+            </Link>
           </div>
           <Button
             type="submit"

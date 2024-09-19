@@ -59,11 +59,14 @@ export default function SignUpPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
+      const token = localStorage.getItem("token"); // Retrieve the token from local storage
+  
       try {
         const response = await fetch('http://localhost:8000/v1/bank/createCustomer', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Include the token in the header
           },
           body: JSON.stringify(formData),
         });
@@ -75,7 +78,7 @@ export default function SignUpPage() {
         setMessage('Error creating account.');
       }
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4">

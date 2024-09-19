@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -17,6 +15,8 @@ const GeneratePINComponent = () => {
   const [error, setError] = useState("");
   const [isCardNumberFocused, setIsCardNumberFocused] = useState(false);
 
+  const token = localStorage.getItem("token"); // Retrieve token from localStorage
+
   // Fetch account number from local storage and card numbers based on that
   useEffect(() => {
     const storedAccountNumber = localStorage.getItem('accountNumber');
@@ -29,7 +29,11 @@ const GeneratePINComponent = () => {
         if (!storedAccountNumber) {
           throw new Error('Account number not found in local storage');
         }
-        const response = await fetch(`http://localhost:8000/v1/bank/getCardNumbers/${storedAccountNumber}`);
+        const response = await fetch(`http://localhost:8000/v1/bank/getCardNumbers/${storedAccountNumber}`, {
+          headers: {
+            'Authorization': `Bearer ${token}` // Include Bearer token
+          }
+        });
         const data = await response.json();
         setCards(data);
       } catch (err) {
@@ -38,7 +42,7 @@ const GeneratePINComponent = () => {
     };
 
     fetchCards();
-  }, []);
+  }, [token]);
 
   const handleGeneratePin = async (e) => {
     e.preventDefault();
@@ -51,6 +55,7 @@ const GeneratePINComponent = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Include Bearer token
         },
         body: JSON.stringify({
           card_number: cardNumber,

@@ -24,8 +24,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const TransactionsComponent = () => {
   const [transactions, setTransactions] = useState([]);
-  const [allTransactions, setAllTransactions] = useState([]); // For filtering
-  const [filteredTransactions, setFilteredTransactions] = useState([]); // For storing filtered results
+  const [allTransactions, setAllTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [transactionError, setTransactionError] = useState("");
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [fromDate, setFromDate] = useState("");
@@ -34,6 +34,7 @@ const TransactionsComponent = () => {
   const navigate = useNavigate();
 
   const email = localStorage.getItem("email");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!email) {
@@ -49,6 +50,7 @@ const TransactionsComponent = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -66,8 +68,8 @@ const TransactionsComponent = () => {
               new Date(b.transaction_date) - new Date(a.transaction_date)
           );
           setTransactions(sortedTransactions);
-          setAllTransactions(sortedTransactions); // Store all transactions
-          setFilteredTransactions(sortedTransactions); // Initialize with all transactions
+          setAllTransactions(sortedTransactions);
+          setFilteredTransactions(sortedTransactions);
         } else {
           setTransactionError("No transactions found.");
         }
@@ -78,7 +80,7 @@ const TransactionsComponent = () => {
     };
 
     fetchTransactions();
-  }, [email]);
+  }, [email, token]);
 
   const handleFilter = (e) => {
     e.preventDefault();
@@ -103,7 +105,19 @@ const TransactionsComponent = () => {
     setFromDate("");
     setToDate("");
     setTransactionType("all");
-    setFilteredTransactions(allTransactions); // Reset to all transactions
+    setFilteredTransactions(allTransactions);
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   return (
@@ -126,7 +140,7 @@ const TransactionsComponent = () => {
               <TableHeader>
                 <TableRow>
                   <TableCell className="font-semibold text-blue-900">Type</TableCell>
-                  <TableCell className="font-semibold text-blue-900">Date</TableCell>
+                  <TableCell className="font-semibold text-blue-900">Date & Time</TableCell>
                   <TableCell className="font-semibold text-blue-900">Amount</TableCell>
                   <TableCell className="font-semibold text-blue-900">From</TableCell>
                   <TableCell className="font-semibold text-blue-900">To</TableCell>
@@ -140,7 +154,7 @@ const TransactionsComponent = () => {
                         {transaction.transaction_type.charAt(0).toUpperCase() + transaction.transaction_type.slice(1)}
                       </TableCell>
                       <TableCell className="text-blue-700">
-                        {new Date(transaction.transaction_date).toLocaleDateString()}
+                        {formatDateTime(transaction.transaction_date)}
                       </TableCell>
                       <TableCell className="font-medium text-blue-800">
                         ${Math.abs(transaction.amount).toFixed(2)}
@@ -219,8 +233,8 @@ const TransactionsComponent = () => {
               Reset Filter
             </Button>
           </form>
-        </DialogContent> 
-     </Dialog> 
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

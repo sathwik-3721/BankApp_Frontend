@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { KeyIcon, CreditCardIcon } from "lucide-react";
 
-const GeneratePinPage = () => {
+const UpdatePinPage = () => {
   const [cardNumber, setCardNumber] = useState("");
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
@@ -17,12 +17,17 @@ const GeneratePinPage = () => {
   const [isCardNumberFocused, setIsCardNumberFocused] = useState(false);
   const [isPinFocused, setIsPinFocused] = useState(false);
 
-  const accountNumber = localStorage.getItem("accountNumber"); // Assuming account number is stored in localStorage
+  const accountNumber = localStorage.getItem("accountNumber");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/v1/bank/getCardNumbers/${accountNumber}`);
+        const response = await fetch(`http://localhost:8000/v1/bank/getCardNumbers/${accountNumber}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
         setCards(data);
       } catch (error) {
@@ -31,7 +36,7 @@ const GeneratePinPage = () => {
     };
 
     fetchCards();
-  }, [accountNumber]);
+  }, [accountNumber, token]);
 
   const handleUpdatePin = async (e) => {
     e.preventDefault();
@@ -44,6 +49,7 @@ const GeneratePinPage = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           card_number: cardNumber,
@@ -83,23 +89,30 @@ const GeneratePinPage = () => {
                   <Label htmlFor="cardNumber" className="text-blue-900 font-semibold">
                     Select Card
                   </Label>
-                  <select
-                    id="cardNumber"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    onFocus={() => setIsCardNumberFocused(true)}
-                    onBlur={() => setIsCardNumberFocused(false)}
-                    required
-                    className="pl-10 bg-white bg-opacity-50 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full py-2 px-3 rounded-md"
-                  >
-                    <option value="" disabled>Select your card</option>
-                    {cards.map((card) => (
-                      <option key={card.card_number} value={card.card_number}>
-                        {card.card_number} ({card.card_type})
-                      </option>
-                    ))}
-                  </select>
-                  <CreditCardIcon className={`absolute left-3 top-9 h-5 w-5 transition-colors duration-200 ${isCardNumberFocused ? 'text-blue-500' : 'text-gray-400'}`} />
+                  <div className="relative">
+                    <select
+                      id="cardNumber"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                      onFocus={() => setIsCardNumberFocused(true)}
+                      onBlur={() => setIsCardNumberFocused(false)}
+                      required
+                      className="pl-10 bg-blue-100 text-blue-800 border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 w-full py-2 px-3 rounded-md appearance-none"
+                    >
+                      <option value="" disabled>Select your card</option>
+                      {cards.map((card) => (
+                        <option key={card.card_number} value={card.card_number} className="bg-blue-100 text-blue-800">
+                          {card.card_number} ({card.card_type})
+                        </option>
+                      ))}
+                    </select>
+                    <CreditCardIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors duration-200 ${isCardNumberFocused ? 'text-blue-600' : 'text-blue-400'}`} />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-blue-600">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
                 <div className="relative">
                   <Label htmlFor="pin" className="text-blue-900 font-semibold">
@@ -181,4 +194,4 @@ const GeneratePinPage = () => {
   );
 }
 
-export default GeneratePinPage;
+export default UpdatePinPage;

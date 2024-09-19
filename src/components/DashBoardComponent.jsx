@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +49,7 @@ const DashBoardComponent = () => {
   const [cardType, setCardType] = useState("");
 
   const email = localStorage.getItem("email");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!email) {
@@ -66,6 +65,7 @@ const DashBoardComponent = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -96,6 +96,7 @@ const DashBoardComponent = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -131,6 +132,7 @@ const DashBoardComponent = () => {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
             },
           }
         );
@@ -149,7 +151,7 @@ const DashBoardComponent = () => {
     fetchBalance();
     fetchTransactions();
     fetchUserName();
-  }, [email]);
+  }, [email, token]);
 
   const handleQuickAction = (action) => {
     if (action === "transfer") {
@@ -170,6 +172,7 @@ const DashBoardComponent = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             from_account_number: fromAccount,
@@ -220,6 +223,7 @@ const DashBoardComponent = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
           },
           body: JSON.stringify({
             account_number: cardAccountNumber,
@@ -245,6 +249,18 @@ const DashBoardComponent = () => {
       setDialogMessage("Card application failed. Please try again.");
       setIsErrorDialogOpen(true);
     }
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   return (
@@ -319,7 +335,7 @@ const DashBoardComponent = () => {
                     Type
                   </TableCell>
                   <TableCell className="font-semibold text-blue-900">
-                    Date
+                    Date & Time
                   </TableCell>
                   <TableCell className="font-semibold text-blue-900">
                     Amount
@@ -341,9 +357,7 @@ const DashBoardComponent = () => {
                           transaction.transaction_type.slice(1)}
                       </TableCell>
                       <TableCell className="text-blue-700">
-                        {new Date(
-                          transaction.transaction_date
-                        ).toLocaleDateString()}
+                        {formatDateTime(transaction.transaction_date)}
                       </TableCell>
                       <TableCell className="font-medium text-blue-800">
                         ${transaction.amount}
@@ -379,6 +393,7 @@ const DashBoardComponent = () => {
         </Card>
       </main>
 
+      {/* Transfer Dialog */}
       <Dialog
         open={isTransferDialogOpen}
         onOpenChange={setIsTransferDialogOpen}
@@ -451,6 +466,7 @@ const DashBoardComponent = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Apply Card Dialog */}
       <Dialog
         open={isApplyCardDialogOpen}
         onOpenChange={setIsApplyCardDialogOpen}
@@ -506,6 +522,7 @@ const DashBoardComponent = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Success Dialog */}
       <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-green-100 to-green-300 bg-opacity-90 backdrop-filter backdrop-blur-lg border border-green-200 shadow-xl">
           <DialogHeader>
@@ -525,6 +542,7 @@ const DashBoardComponent = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Error Dialog */}
       <Dialog open={isErrorDialogOpen} onOpenChange={setIsErrorDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-red-100 to-red-300 bg-opacity-90 backdrop-filter backdrop-blur-lg border border-red-200 shadow-xl">
           <DialogHeader>
