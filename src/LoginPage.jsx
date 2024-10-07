@@ -26,23 +26,18 @@ export default function Component() {
         throw new Error("Login failed");
       }
 
-      // Assuming the response contains a message and token
       const result = await response.json();
 
-      // Store the token in localStorage upon successful login
       localStorage.setItem("token", result.token);
-
-      // Store the email in localStorage
       localStorage.setItem("email", email);
 
-      // Fetch the username
       try {
-        const token = result.token; // Use the token from login response
+        const token = result.token;
         const usernameResponse = await fetch(`http://localhost:8000/v1/bank/getUserName/${email}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`, // Pass token as Bearer token
+            "Authorization": `Bearer ${token}`,
           },
         });
 
@@ -54,11 +49,9 @@ export default function Component() {
         localStorage.setItem("username", usernameResult.name);
       } catch (usernameError) {
         console.error("Error fetching username:", usernameError);
-        // If username fetch fails, set a default or leave it unset
-        localStorage.setItem("username", email.split('@')[0]); // Use email prefix as fallback
+        localStorage.setItem("username", email.split('@')[0]);
       }
 
-      // Redirect to dashboard
       navigate("/home/dashboard");
     } catch (error) {
       console.error("Error:", error);
@@ -113,14 +106,7 @@ export default function Component() {
               />
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="form-checkbox text-blue-500 rounded"
-              />
-              <span className="text-sm text-blue-700">Remember me</span>
-            </label>
+          <div className="text-center">
             <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
               Forgot password?
             </Link>
